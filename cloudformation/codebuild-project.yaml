@@ -1,0 +1,28 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Create a CodeBuild Project
+
+Resources:
+    AmiBakeryProject:
+        Type: AWS::CodeBuild::Project
+        Properties:
+            Name: AMI-Bakery
+            Artifacts:
+                Type: NO_ARTIFACTS
+            Environment:
+                ComputeType: BUILD_GENERAL1_SMALL
+                Image: 096228720572.dkr.ecr.eu-west-1.amazonaws.com/packer:latest
+                Type: LINUX_CONTAINER
+            ServiceRole: !ImportValue "AMI-Bakery:CodeBuildRoleArn"
+            TimeoutInMinutes: 15
+            Source:
+                Type: CODECOMMIT
+                Location: https://git-codecommit.eu-west-1.amazonaws.com/v1/repos/BakeryGit
+
+Outputs:
+    CodeBuildProject:
+        Value: !Ref AmiBakeryProject
+        Description: CodeBuild Project
+        Export:
+            Name: AMI-Bakery:CodeBuildProject

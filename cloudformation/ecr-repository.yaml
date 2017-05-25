@@ -1,0 +1,28 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Create an ECR Repository to upload the CodeBuild container
+
+Resources:
+    CodeBuildRepository:
+        Type: "AWS::ECR::Repository"
+        Properties:
+            RepositoryName: "packer"
+            RepositoryPolicyText:
+                Version: "2012-10-17"
+                Statement:
+                  - Sid: CodeBuildAccess
+                    Effect: Allow
+                    Principal:
+                        AWS: ["codebuild.amazonaws.com"]
+                    Action:
+                      - ecr:GetDownloadUrlForLayer
+                      - ecr:BatchGetImage
+                      - ecr:BatchCheckLayerAvailability
+
+Outputs:
+    ECRRepoName:
+        Value: !Ref CodeBuildRepository
+        Description: ECR Repository Name
+        Export:
+            Name: !Join [ ":", [ !Ref "AWS::StackName", ECRRepoName ] ]

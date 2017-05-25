@@ -1,0 +1,32 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Create a role for the CodePipeline service
+
+Resources:
+    CodePipelineRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName: codepipeline-role
+            AssumeRolePolicyDocument:
+                Statement:
+                  - Effect: Allow
+                    Principal:
+                        Service: [codepipeline.amazonaws.com]
+                    Action: sts:AssumeRole
+            Path: /
+            ManagedPolicyArns:
+              - arn:aws:iam::aws:policy/AdministratorAccess
+
+Outputs:
+    CodePipelineRole:
+        Value: !Ref CodePipelineRole
+        Description: CodePipelineRole
+        Export:
+            Name: AMI-Bakery:CodePipelineRole
+
+    CodePipelineRoleArn:
+        Value: !GetAtt CodePipelineRole.Arn
+        Description: CodePipelineRole ARN
+        Export:
+            Name: AMI-Bakery:CodePipelineRoleArn

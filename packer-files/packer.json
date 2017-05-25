@@ -1,0 +1,19 @@
+{
+    "builders": [{
+        "type": "amazon-ebs",
+        "region": "eu-west-1",
+        "vpc_id": "vpc-4925e72e",
+        "subnet_id": "subnet-4d13d12a",
+        "source_ami": "ami-01ccc867",
+        "instance_type": "t2.micro",
+        "ssh_username": "ec2-user",
+        "ami_name": "yum-upgrade {{timestamp}}"
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "inline": [
+            "sleep 30",
+            "sudo yum update -y"
+        ]
+    }]
+}

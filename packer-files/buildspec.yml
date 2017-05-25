@@ -1,0 +1,18 @@
+version: 0.2
+
+environment_variables:
+    plaintext:
+        PACKER_NO_COLOR: "1"
+
+phases:
+    install:
+        commands:
+            - curl -qL 169.254.170.2/$AWS_CONTAINER_CREDENTIALS_RELATIVE_URI > credentials.json
+            - mkdir -p ~/.aws
+            - echo "[default]" > ~/.aws/credentials
+            - echo "aws_access_key_id = $(cat credentials.json | jq '.AccessKeyId' | sed s'/"//g')" >> ~/.aws/credentials
+            - echo "aws_secret_access_key = $(cat credentials.json | jq '.SecretAccessKey' | sed s'/"//g')" >> ~/.aws/credentials
+            - echo "aws_session_token = $(cat credentials.json | jq '.Token' | sed s'/"//g')" >> ~/.aws/credentials
+    build:
+        commands:
+            - /packer build packer.json

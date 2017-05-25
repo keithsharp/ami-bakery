@@ -1,0 +1,75 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Create a VPC with a single, private subnet.
+# If I need the public subnet I'll need an Internet Gateway and some routes!
+
+Resources:
+    VPC:
+        Type: AWS::EC2::VPC
+        Properties:
+            CidrBlock: 10.0.0.0/16
+            EnableDnsSupport: true
+            EnableDnsHostnames: true
+            InstanceTenancy: default
+
+    InternetGateway:
+        Type: AWS::EC2::InternetGateway
+
+    AttachGateway:
+        Type: AWS::EC2::VPCGatewayAttachment
+        Properties:
+            VpcId: !Ref VPC
+            InternetGatewayId: !Ref InternetGateway
+
+    PublicSubnetRouteTable:
+        Type: AWS::EC2::RouteTable
+        Properties:
+            VpcId: !Ref VPC
+
+    PublicSubnetInternetRoute:
+        Type: AWS::EC2::Route
+        DependsOn: InternetGateway
+        Properties:
+            DestinationCidrBlock: 0.0.0.0/0
+            GatewayId: !Ref InternetGateway
+            RouteTableId: !Ref PublicSubnetRouteTable
+
+    PublicSubnetRouteTableAssociation:
+        Type: AWS::EC2::SubnetRouteTableAssociation
+        Properties:
+            RouteTableId: !Ref PublicSubnetRouteTable
+            SubnetId: !Ref PublicSubnet
+
+    PublicSubnet:
+        Type: AWS::EC2::Subnet
+        Properties:
+            VpcId: !Ref VPC
+            CidrBlock: 10.0.0.0/24
+            MapPublicIpOnLaunch: true
+
+    # PrivateSubnet:
+    #     Type: AWS::EC2::Subnet
+    #     Properties:
+    #         VpcId: !Ref VPC
+    #         CidrBlock: 10.0.1.0/24
+    #         MapPublicIpOnLaunch: false
+
+Outputs:
+    VPCID:
+        Value: !Ref VPC
+        Description: VPC ID
+        Export:
+            Name: !Join [ ":", [ !Ref "AWS::StackName", VPCID ] ]
+
+    PublicSubnetID:
+        Value: !Ref PublicSubnet
+        Description: Public Subnet ID
+        Export:
+            Name: !Join [ ":", [ !Ref "AWS::StackName", PublicSubnetID ] ]
+
+    # PrivateSubnetID:
+    #     Value: !Ref PrivateSubnet
+    #     Description: Private Subnet ID
+    #     Export:
+    #         Name: !Join [ ":", [ !Ref "AWS::StackName", PrivateSubnetID ] ]

@@ -1,0 +1,24 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Create a Git repository
+
+Resources:
+    Git:
+        Type: "AWS::CodeCommit::Repository"
+        Properties:
+            RepositoryName: BakeryGit
+            RepositoryDescription: Git repository for AMI Bakery
+
+Outputs:
+    GitRepoName:
+        Value: !GetAtt Git.Name
+        Description: Git Repository Name
+        Export:
+            Name: !Join [ ":", [ !Ref "AWS::StackName", GitRepoName ] ]
+
+    GitRepoArn:
+        Value: !GetAtt Git.Arn
+        Description: Git Repository ARN
+        Export:
+            Name: !Join [ ":", [ !Ref "AWS::StackName", GitRepoArn ] ]

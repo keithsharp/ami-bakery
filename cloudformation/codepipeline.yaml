@@ -1,0 +1,50 @@
+---
+AWSTemplateFormatVersion: "2010-09-09"
+
+# Create a CodePipeline to build an AMI using CodeBuild/Packer
+
+Resources:
+    ArtifactBucket:
+        Type: AWS::S3::Bucket
+        Properties:
+            AccessControl: Private
+            VersioningConfiguration:
+                Status: Enabled
+
+    BakeryPipeline:
+        Type: "AWS::CodePipeline::Pipeline"
+        Properties:
+            DisableInboundStageTransitions: []
+            Name: AMI-Bakery-Pipeline
+            RoleArn: !ImportValue AMI-Bakery:CodePipelineRoleArn
+            ArtifactStore:
+                Type: S3
+                Location: !Ref ArtifactBucket
+            Stages:
+              - Name: CodeCommitSource
+                Actions:
+                  - Name: SourceAction
+                    ActionTypeId:
+                        Category: Source
+                        Owner: AWS
+                        Version: 1
+                        Provider: CodeCommit
+                    OutputArtifacts:
+                      - Name: PackerFiles
+                    Configuration:
+                        BranchName: master
+                        RepositoryName: !ImportValue CodeBuild-Git:GitRepoName
+                    RunOrder: 1
+              - Name: CodeBuild
+                Actions:
+                  - Name: CodeBuildAction
+                    ActionTypeId:
+                        Category: Build
+                        Owner: AWS
+                        Version: 1
+                        Provider: CodeBuild
+                    InputArtifacts:
+                      - Name: PackerFiles
+                    Configuration:
+                        ProjectName: !ImportValue AMI-Bakery:CodeBuildProject
+                    RunOrder: 1
